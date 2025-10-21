@@ -147,8 +147,11 @@
                 </div>
             </section>
 
-            <!-- Botão de Ação -->
-            <footer class="flex justify-center mt-6">
+            <!-- Botões de Ação -->
+            <footer class="flex flex-col sm:flex-row justify-center gap-3 mt-6">
+                <a href="sistema-respiratorio.html" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md text-sm sm:text-base text-center">
+                    Sistema Respiratório
+                </a>
                 <button id="clear-button" class="w-full sm:w-auto bg-gray-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-700 transition-all duration-300 shadow-md text-sm sm:text-base">
                     Limpar Campos
                 </button>
@@ -162,13 +165,11 @@
             const clearButton = document.getElementById('clear-button');
             const inputs = document.querySelectorAll('.input-field');
 
-            // Função para remover acentos e converter para maiúsculas
             const normalizeString = (str) => {
                 if (!str) return '';
                 return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
             };
 
-            // Função para checar a resposta de um campo específico
             const checkAnswer = (input) => {
                 const userAnswer = normalizeString(input.value);
                 const correctAnswer = normalizeString(input.dataset.answer);
@@ -186,19 +187,16 @@
                 }
             };
 
-            // Auto-validação ao trocar de campo (blur event)
             inputs.forEach(input => {
                 input.addEventListener('blur', () => {
                     checkAnswer(input);
                 });
 
-                // Remove as classes de validação enquanto digita
                 input.addEventListener('input', () => {
                     input.classList.remove('correct', 'incorrect');
                 });
             });
 
-            // Botão de limpar
             clearButton.addEventListener('click', () => {
                 inputs.forEach(input => {
                     input.value = '';
