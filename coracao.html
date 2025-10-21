@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Estudo - Coração</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        #drawingCanvas {
+            width: 100%;
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        
+        .comparison-container {
+            display: none;
+            gap: 1rem;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+        
+        .comparison-container.active {
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+        
+        @media (min-width: 768px) {
+            .comparison-container.active {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .comparison-item {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .comparison-item img,
+        .comparison-item canvas {
+            width: 100%;
+            display: block;
+        }
+        
+        .comparison-label {
+            background: #667eea;
+            color: white;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .color-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            cursor: pointer;
+        }
+        
+        .color-button.active {
+            border-color: #fff;
+            box-shadow: 0 0 0 3px #3b82f6;
+        }
+        
+        .tool-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid #d1d5db;
+            background: white;
+            font-size: 0.875rem;
+        }
+        
+        .tool-button:hover {
+            background: #f3f4f6;
+        }
+        
+        .instruction-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-2">
+
+    <div class="bg-white p-3 sm:p-8 rounded-2xl shadow-lg w-full max-w-6xl mx-auto">
+
+        <header class="text-center mb-3">
+            <h1 class="text-lg sm:text-3xl font-bold text-gray-800">Fluxo Sanguíneo do Coração</h1>
+            <p class="text-xs sm:text-base text-gray-500 mt-1">Desenhe as setas indicando o fluxo sanguíneo.</p>
+        </header>
+
+        <!-- Instruções -->
+        <div class="instruction-box text-center">
+            <p class="font-semibold">1. Escolha a cor (azul, vermelho)</p>
+            <p>2. Clique e arraste para desenhar as setas</p>
+        </div>
+
+        <!-- Seletor de Cor -->
+        <div id="colorButtons" class="flex gap-2 justify-center mb-3 flex-wrap">
+            <button id="redBtn" class="color-button bg-red-600 text-white hover:bg-red-700">
+                🔴 Vermelho
+            </button>
+            <button id="blueBtn" class="color-button bg-blue-600 text-white hover:bg-blue-700 active">
+                🔵 Azul
+            </button>
+        </div>
+
+        <!-- Controles -->
+        <div class="flex gap-2 justify-center mb-3 flex-wrap">
+            <button id="undoBtn" class="tool-button">↶ Desfazer</button>
+            <button id="clearBtn" class="tool-button">🗑️ Limpar Tudo</button>
+            <button id="gabaritoBtn" class="tool-button bg-yellow-600 text-white hover:bg-yellow-700 border-yellow-600">
+                👁️ Ver Gabarito
+            </button>
+        </div>
+
+        <!-- Canvas de Desenho (modo normal) -->
+        <div id="drawingMode">
+            <div class="canvas-container mb-3">
+                <canvas id="drawingCanvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Modo Comparação (lado a lado) -->
+        <div id="comparisonMode" class="comparison-container">
+            <div class="comparison-item">
+                <div class="comparison-label">Seu Desenho</div>
+                <canvas id="userCanvas"></canvas>
+            </div>
+            <div class="comparison-item">
+                <div class="comparison-label">Gabarito</div>
+                <img id="gabaritoImage" src="gabarito.jpeg" alt="Gabarito">
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <footer class="flex justify-center gap-3 mt-4">
+            <a href="sistema-respiratorio.html" class="bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 transition-all shadow-md text-sm sm:text-base text-center">
+                ← Voltar
+            </a>
+        </footer>
+
+    </div>
+
+    <script>
+        // Elementos
+        const drawingCanvas = document.getElementById('drawingCanvas');
+        const userCanvas = document.getElementById('userCanvas');
+        const ctx = drawingCanvas.getContext('2d');
+        const userCtx = userCanvas.getContext('2d');
+        
+        const drawingMode = document.getElementById('drawingMode');
+        const comparisonMode = document.getElementById('comparisonMode');
+        
+        const redBtn = document.getElementById('redBtn');
+        const blueBtn = document.getElementById('blueBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const gabaritoBtn = document.getElementById('gabaritoBtn');
+        const colorButtons = document.getElementById('colorButtons');
+
+        // Variáveis de estado
+        let currentColor = '#3b82f6';
+        let isDrawing = false;
+        let startX, startY;
+        let arrows = [];
+        let imageLoaded = false;
+        let showingGabarito = false;
+
+        // Criar e carregar imagem
+        const img = new Image();
+        
+        img.onload = function() {
+            console.log('Imagem carregada com sucesso!');
+            imageLoaded = true;
+            drawingCanvas.width = img.width;
+            drawingCanvas.height = img.height;
+            userCanvas.width = img.width;
+            userCanvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+        };
+        
+        img.onerror = function() {
+            console.error('ERRO: Não foi possível carregar coracao.jpeg');
+            alert('Erro ao carregar a imagem. Verifique se o arquivo coracao.jpeg está na mesma pasta.');
+        };
+        
+        img.src = 'coracao.jpeg';
+
+        // Função para desenhar seta
+        function drawArrow(context, fromX, fromY, toX, toY, color) {
+            const headlen = 12;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+
+            context.strokeStyle = color;
+            context.fillStyle = color;
+            context.lineWidth = 3;
+            context.lineCap = 'round';
+
+            context.beginPath();
+            context.moveTo(fromX, fromY);
+            context.lineTo(toX, toY);
+            context.stroke();
+
+            context.beginPath();
+            context.moveTo(toX, toY);
+            context.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            context.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            context.closePath();
+            context.fill();
+        }
+
+        // Redesenhar canvas
+        function redrawCanvas(context = ctx) {
+            if (!imageLoaded) return;
+            context.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+            context.drawImage(img, 0, 0);
+            arrows.forEach(arrow => {
+                drawArrow(context, arrow.fromX, arrow.fromY, arrow.toX, arrow.toY, arrow.color);
+            });
+        }
+
+        // Obter posição
+        function getPos(e, canvas) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        // Eventos Mouse
+        drawingCanvas.addEventListener('mousedown', (e) => {
+            if (!imageLoaded || showingGabarito) return;
+            isDrawing = true;
+            const pos = getPos(e, drawingCanvas);
+            startX = pos.x;
+            startY = pos.y;
+        });
+
+        drawingCanvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing || !imageLoaded || showingGabarito) return;
+            const pos = getPos(e, drawingCanvas);
+            redrawCanvas();
+            drawArrow(ctx, startX, startY, pos.x, pos.y, currentColor);
+        });
+
+        drawingCanvas.addEventListener('mouseup', (e) => {
+            if (!isDrawing || !imageLoaded || showingGabarito) return;
+            const pos = getPos(e, drawingCanvas);
+            arrows.push({ fromX: startX, fromY: startY, toX: pos.x, toY: pos.y, color: currentColor });
+            isDrawing = false;
+            redrawCanvas();
+        });
+
+        // Eventos Touch
+        drawingCanvas.addEventListener('touchstart', (e) => {
+            if (!imageLoaded || showingGabarito) return;
+            e.preventDefault();
+            isDrawing = true;
+            const pos = getPos(e, drawingCanvas);
+            startX = pos.x;
+            startY = pos.y;
+        });
+
+        drawingCanvas.addEventListener('touchmove', (e) => {
+            if (!isDrawing || !imageLoaded || showingGabarito) return;
+            e.preventDefault();
+            const pos = getPos(e, drawingCanvas);
+            redrawCanvas();
+            drawArrow(ctx, startX, startY, pos.x, pos.y, currentColor);
+        });
+
+        drawingCanvas.addEventListener('touchend', (e) => {
+            if (!isDrawing || !imageLoaded || showingGabarito) return;
+            e.preventDefault();
+            const pos = getPos(e.changedTouches[0], drawingCanvas);
+            arrows.push({ fromX: startX, fromY: startY, toX: pos.x, toY: pos.y, color: currentColor });
+            isDrawing = false;
+            redrawCanvas();
+        });
+
+        // Botões de cor
+        redBtn.addEventListener('click', () => {
+            currentColor = '#ef4444';
+            redBtn.classList.add('active');
+            blueBtn.classList.remove('active');
+        });
+
+        blueBtn.addEventListener('click', () => {
+            currentColor = '#3b82f6';
+            blueBtn.classList.add('active');
+            redBtn.classList.remove('active');
+        });
+
+        // Desfazer
+        undoBtn.addEventListener('click', () => {
+            if (showingGabarito) return;
+            arrows.pop();
+            redrawCanvas();
+        });
+
+        // Limpar
+        clearBtn.addEventListener('click', () => {
+            if (showingGabarito) return;
+            arrows = [];
+            redrawCanvas();
+        });
+
+        // Toggle Gabarito - Comparação Lado a Lado
+        gabaritoBtn.addEventListener('click', () => {
+            showingGabarito = !showingGabarito;
+            
+            if (showingGabarito) {
+                // Copiar desenho do usuário para o canvas de comparação
+                redrawCanvas(userCtx);
+                
+                // Mostrar modo comparação
+                drawingMode.style.display = 'none';
+                comparisonMode.classList.add('active');
+                colorButtons.style.display = 'none';
+                
+                // Mudar botão
+                gabaritoBtn.textContent = '✏️ Voltar ao Desenho';
+                gabaritoBtn.classList.remove('bg-yellow-600', 'hover:bg-yellow-700', 'border-yellow-600');
+                gabaritoBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'border-blue-600');
+                
+                // Desabilitar outros botões
+                undoBtn.disabled = true;
+                clearBtn.disabled = true;
+                undoBtn.style.opacity = '0.5';
+                clearBtn.style.opacity = '0.5';
+            } else {
+                // Voltar ao modo desenho
+                drawingMode.style.display = 'block';
+                comparisonMode.classList.remove('active');
+                colorButtons.style.display = 'flex';
+                
+                // Restaurar botão
+                gabaritoBtn.textContent = '👁️ Ver Gabarito';
+                gabaritoBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'border-blue-600');
+                gabaritoBtn.classList.add('bg-yellow-600', 'hover:bg-yellow-700', 'border-yellow-600');
+                
+                // Reabilitar botões
+                undoBtn.disabled = false;
+                clearBtn.disabled = false;
+                undoBtn.style.opacity = '1';
+                clearBtn.style.opacity = '1';
+            }
+        });
+    </script>
+</body>
+</html>
