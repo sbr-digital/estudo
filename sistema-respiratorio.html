@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Estudo - Sistema Respiratório</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .input-field {
+            width: 120px;
+            font-size: 0.75rem;
+            text-align: center;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.4rem 0.3rem;
+            transition: all 0.3s;
+            background-color: white;
+        }
+        
+        @media (min-width: 640px) {
+            .input-field {
+                width: 140px;
+                font-size: 0.875rem;
+                padding: 0.5rem 0.4rem;
+            }
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+        
+        .correct {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
+        }
+        
+        .incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        
+        .image-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .respiratory-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 1rem;
+        }
+        
+        .input-overlay {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 0.5rem;
+            padding: 0.3rem;
+        }
+        
+        /* Posições dos campos sobre a imagem */
+        .field-cavidade-nasal { top: 8%; left: 5%; }
+        .field-narina { top: 13%; left: 15%; }
+        .field-epiglote { top: 16%; left: 25%; }
+        .field-laringe { top: 20%; left: 18%; }
+        .field-faringe { top: 16%; right: 10%; }
+        .field-traqueia { top: 38%; right: 8%; }
+        .field-cavidade-pleural { top: 50%; left: 2%; }
+        .field-bronquio { top: 48%; right: 5%; }
+        .field-pulmao-direito { top: 60%; left: 5%; }
+        .field-pulmao-esquerdo { top: 60%; right: 5%; }
+        .field-diafragma { bottom: 15%; left: 50%; transform: translateX(-50%); }
+        
+        .content-wrapper {
+            max-width: 100%;
+            width: 100%;
+        }
+        
+        .page-container {
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-3 page-container">
+
+    <div id="form-container" class="bg-white p-4 sm:p-8 rounded-2xl shadow-lg w-full max-w-3xl mx-auto content-wrapper">
+
+        <header class="text-center mb-6">
+            <h1 class="text-xl sm:text-3xl font-bold text-gray-800">Sistema Respiratório</h1>
+            <p class="text-xs sm:text-base text-gray-500 mt-1">Complete os órgãos do sistema respiratório.</p>
+        </header>
+
+        <main id="study-form">
+            
+            <!-- Container com Imagem e Campos Sobrepostos -->
+            <div class="image-container mb-6">
+                <img src="sistema.png" alt="Sistema Respiratório" class="respiratory-image">
+                
+                <!-- Campos de Input Sobrepostos -->
+                <div class="input-overlay field-cavidade-nasal">
+                    <input type="text" class="input-field" data-answer="CAVIDADE NASAL" placeholder="?">
+                </div>
+                
+                <div class="input-overlay field-narina">
+                    <input type="text" class="input-field" data-answer="NARINA" placeholder="?">
+                </div>
+                
+                <div class="input-overlay field-epiglote">
+                    <input type="text" class="input-field" data-answer="EPIGLOTE" placeholder="?">
+                </div>
+                
+                <div class="input-overlay field-laringe">
+                    <input type="text" class="input-field" data-answer="LARINGE" placeholder="?">
+                </div>
+                
+                <div class="input-overlay field-faringe">
+                    <input type="text" class="input-field" data-answer="FARINGE" placeholder="?">
+                </div>
+                
+                <div class="input-overlay field-traqueia">
+                    <input type="text" class="input-field" data-answer="TRAQUEIA" placeholder="?">
+                </div>
+                
+                <div class="input-overlay field-cavidade-pleural">
+                    <input type="text" class="input-field" data-answer="CAVIDADE PLEURAL" placeholder="?">
+                </div>
+                
+                <div class="input-overlay field-bronquio">
+                    <input type="text" class="input-field" data-answer="BRÔNQUIO PRIMÁRIO" placeholder="?">
+                </div>
+                
+                <div class="input-overlay field-pulmao-direito">
+                    <input type="text" class="input-field" data-answer="PULMÃO DIREITO" placeholder="?">
+                </div>
+                
+                <div class="input-overlay field-pulmao-esquerdo">
+                    <input type="text" class="input-field" data-answer="PULMÃO ESQUERDO" placeholder="?">
+                </div>
+                
+                <div class="input-overlay field-diafragma">
+                    <input type="text" class="input-field" data-answer="DIAFRAGMA" placeholder="?">
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <footer class="flex flex-col sm:flex-row justify-center gap-3 mt-6">
+                <a href="index.html" class="w-full sm:w-auto bg-purple-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-purple-700 transition-all duration-300 shadow-md text-sm sm:text-base text-center">
+                    ← Voltar para Circulação
+                </a>
+                <button id="clear-button" class="w-full sm:w-auto bg-gray-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-700 transition-all duration-300 shadow-md text-sm sm:text-base">
+                    Limpar Campos
+                </button>
+            </footer>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const clearButton = document.getElementById('clear-button');
+            const inputs = document.querySelectorAll('.input-field');
+
+            const normalizeString = (str) => {
+                if (!str) return '';
+                return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+            };
+
+            const checkAnswer = (input) => {
+                const userAnswer = normalizeString(input.value);
+                const correctAnswer = normalizeString(input.dataset.answer);
+
+                input.classList.remove('correct', 'incorrect');
+
+                if (userAnswer === '') {
+                    return;
+                }
+
+                if (userAnswer === correctAnswer) {
+                    input.classList.add('correct');
+                } else {
+                    input.classList.add('incorrect');
+                }
+            };
+
+            inputs.forEach(input => {
+                input.addEventListener('blur', () => {
+                    checkAnswer(input);
+                });
+
+                input.addEventListener('input', () => {
+                    input.classList.remove('correct', 'incorrect');
+                });
+            });
+
+            clearButton.addEventListener('click', () => {
+                inputs.forEach(input => {
+                    input.value = '';
+                    input.classList.remove('correct', 'incorrect');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
